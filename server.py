@@ -38,23 +38,21 @@ def leer_tabla(recibido):
 		respuesta="No existe la tabla"
 	return(respuesta)
 
-def leer_tabla_dos(tabla):
+def leer_tabla_dos(tabla, id):
 	global nombre, disco_temp
 	#nombre_t=archivo.split('.')
-	if(recibido==nombre):
-		#regresas tabla
-		global disco_temp
-		archivo=open(nombre+".txt", 'r')
-		while True:
-			linea=archivo.readline()
-			disco_temp.append(linea)
-			if not linea:
-				break
-		archivo.close()
-		disco_temp.pop()
-		respuesta="".join(disco_temp)
-	else:
-		respuesta="No existe la tabla"
+	#regresas tabla
+	archivo=open(nombre+".txt", 'r')
+	while True:
+		linea=archivo.readline()
+		disco_temp.append(linea)
+		if not linea:
+			break
+	archivo.close()
+	disco_temp.pop(int(id))
+	#disco_temp.pop()
+	respuesta="".join(disco_temp)
+	del disco_temp[:]
 	return(respuesta)
 
 def escribir_tabla(insertar, tabla):
@@ -69,7 +67,8 @@ def escribir_tabla(insertar, tabla):
 	return("registro insertado con éxito")
 
 def escribir_tabla_dos(cadena):
-	archivo=open(tabla+".txt", 'w')
+	global nombre
+	archivo=open(nombre+".txt", 'w')
 	archivo.write(cadena)
 	archivo.close()
 	return("registro eliminado")
@@ -152,10 +151,11 @@ def delete_db(comando_recivido):
 	elif(comando_recivido[3]!="WHERE"):
 		respuesta_delete="error de sintaxis"
 	else:
-		cadena=leer_tabla_dos(nombre)
+		id=comando_recivido[4].split('=')
+		print(id[1])
+		cadena=leer_tabla_dos(nombre, id[1])
 		respuesta_delete=escribir_tabla_dos(cadena)
-		del datos[:]
-	return(respuesta_insert)
+	return(respuesta_delete)
 	
 def comando(socket_cliente):
 	global exit, apagar
@@ -179,14 +179,16 @@ def comando(socket_cliente):
 		#SELECT * FROM tabla
 		respuesta=select_db(comando_recivido)
 		socket_cliente.send(respuesta.encode())
+	elif(len(comando_recivido)==5 and comando_recivido[0]=="DELETE"):
+		#print("entro en delete_db")
+		respuesta=delete_db(comando_recivido)
+		socket_cliente.send(respuesta.encode())
+		#DELETE FROM Alumno WHERE Id=2
 	elif(len(comando_recivido)==5):
+		#print("entro en insert_db")
 		#INSERT INTO tabla VALUES (valores)
 		respuesta=insert_db(comando_recivido)
 		socket_cliente.send(respuesta.encode())
-	elif(len(comando_recivido)==5):
-		respuesta=delete_db(comando_recivido)
-		socket_cliente.send(respuesta.encode())
-	#DELETE FROM Alumno WHERE Id=2
 	socket_cliente.close()
 
 def logear(socket_cliente):
