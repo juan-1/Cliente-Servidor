@@ -152,7 +152,7 @@ def delete_db(comando_recivido):
 		respuesta_delete="error de sintaxis"
 	else:
 		id=comando_recivido[4].split('=')
-		print(id[1])
+		#print(id[1])
 		cadena=leer_tabla_dos(nombre, id[1])
 		respuesta_delete=escribir_tabla_dos(cadena)
 	return(respuesta_delete)
